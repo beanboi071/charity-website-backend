@@ -37,7 +37,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                         Username = SignUpData.Username,
                         Email = SignUpData.Email,
                         Balance = 100000,
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(SignUpData.Password)
+                        Password_Hash = BCrypt.Net.BCrypt.HashPassword(SignUpData.Password)
                     };
                     var registerDonor = _context.Donors.Add(newDonor);
                     _context.SaveChanges();
@@ -64,7 +64,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                         Username = SignUpData.Username,
                         Email = SignUpData.Email,
                         Balance = 0,
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(SignUpData.Password)
+                        Password_Hash = BCrypt.Net.BCrypt.HashPassword(SignUpData.Password)
                     };
                     var registerNGO = _context.NGOs.Add(newNGO);
                     _context.SaveChanges();
