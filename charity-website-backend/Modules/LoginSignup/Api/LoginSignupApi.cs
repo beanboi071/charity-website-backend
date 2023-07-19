@@ -9,10 +9,15 @@ namespace charity_website_backend.Modules.LoginSignup.Api
         {
             var root = "Api/";
             app.MapPost(root + "SiginUp", SignUp);
+            app.MapPost(root + "Login", Login);
         }
         private static IResult<bool> SignUp(SignUpDTO SignupData,ILoginSignupService service)
         {
             return service.SignUp(SignupData);
+        }
+        private static IResult<string> Login(LoginDTO LoginData, ILoginSignupService service)
+        {
+            return service.Login(LoginData);
         }
     }
 }

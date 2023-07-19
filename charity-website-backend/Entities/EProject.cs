@@ -3,6 +3,7 @@
     public class EProject
     {
         public int Id { get; set; }
+        public string Title { get; set; }
         public int NGO_Id { get; set; }
         public string? Description { get; set; }
         public string? Image_Path { get; set; }
