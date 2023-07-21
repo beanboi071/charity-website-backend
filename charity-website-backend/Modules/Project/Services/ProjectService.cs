@@ -39,5 +39,24 @@ namespace charity_website_backend.Modules.Project.Services
                 Status = status.Success
             };
         }
+
+        public IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId)
+        {
+            var projects = _context.Projects.Where(x => x.NGO_Id == NGOId).ToList();
+            var data = (from c in projects
+                        select new ProjectListDTO()
+                        {
+                            Id = c.Id,
+                            ImagePath = c.Image_Path,
+                            Title = c.Title,
+                            AmountRaised = c.Amount_Raised,
+                            TargetAmount = c.Target_Amount
+                        }).AsQueryable();
+            return new IResult<IQueryable<ProjectListDTO>>()
+            {
+                Data = data,
+                Status = status.Success
+            };
+        }
     }
 }
