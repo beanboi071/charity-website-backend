@@ -30,7 +30,7 @@ namespace charity_website_backend.Common.Services
                 byte[] imageBytes = Convert.FromBase64String(base64String);
 
                 // Get the desired filename from user input or some other source
-                string rootDirectory = "C:\\Users\\Riddhasoft-002\\Documents\\Rojan ko project\\charity-website-frontend\\public\\images";
+                string rootDirectory = AppDomain.CurrentDomain.BaseDirectory + @"uploads"; ;
                 filename += extension;
                 string fullPath = Path.Combine(rootDirectory, folder, filename);
                 if (!Directory.Exists(Path.Combine(rootDirectory, folder)))
