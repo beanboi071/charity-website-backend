@@ -40,6 +40,29 @@ namespace charity_website_backend.Modules.Project.Services
             };
         }
 
+        public IResult<ProjectDetailDTO> GetProjectDetails(int projectid)
+        {
+            var data = _context.Projects.Find(projectid);
+            var projectDetails = new ProjectDetailDTO()
+            {
+                Id = data.Id,
+                Title = data.Title,
+                ImagePath = data.Image_Path,
+                NGOId = data.NGO_Id,
+                Description = data.Description,
+                AmountRaised = data.Amount_Raised,
+                CreatedDateTime = data.Created_Date_And_Time.ToString(),
+                Status = data.Status,
+                TargetAmount = data.Target_Amount,
+            };
+            return new IResult<ProjectDetailDTO>()
+            {
+                Data = projectDetails,
+                Status = status.Success,
+                Message = "Project details fetched sccessfully"
+            };
+        }
+
         public IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId)
         {
             var projects = _context.Projects.Where(x => x.NGO_Id == NGOId).ToList();

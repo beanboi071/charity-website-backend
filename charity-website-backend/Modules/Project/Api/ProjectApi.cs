@@ -11,6 +11,7 @@ namespace charity_website_backend.Modules.Project.Api
             var root = "Api/ProjectApi/";
             app.MapPost(root + "CreateProject", Create);
             app.MapGet(root + "GetProjectsByNGOId", GetProjectsByNGOId);
+            app.MapGet(root + "GetProjectDetails", GetProjectDetails);
         }
         private static IResult<EProject> Create(ProjectCreateDTO model, IProjectService service, ISessionService sessionService)
         {
@@ -24,6 +25,10 @@ namespace charity_website_backend.Modules.Project.Api
             int NGOId = session.Id;
             return service.GetProjectsByNGOId(NGOId);
 
+        }
+        private static IResult<ProjectDetailDTO> GetProjectDetails(IProjectService service, int projectId)
+        {
+            return service.GetProjectDetails(projectId);
         }
     }
 }
