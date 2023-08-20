@@ -1,3 +1,4 @@
+using charity_website_backend.Common.API;
 using charity_website_backend.Common.Services;
 using charity_website_backend.DB;
 using charity_website_backend.Modules.LoginSignup.Api;
@@ -70,6 +71,7 @@ if (app.Environment.IsDevelopment())
 }
 app.RegisterLoginSignupApi();
 app.RegisterProjectApi();
+app.RegisterCommonApi();
 app.UseHttpsRedirection();
 //app.UseCors("CorsPolicy");
 

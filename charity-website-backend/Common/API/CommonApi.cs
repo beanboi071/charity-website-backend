@@ -9,7 +9,7 @@ namespace charity_website_backend.Common.API
         public static void RegisterCommonApi(this WebApplication app)
         {
             
-            app.MapPost("File", GetFile);
+            app.MapGet("File", GetFile);
             
         }
         private static Task GetFile(ICommonService service, string fileName, HttpContext context)
