@@ -62,7 +62,59 @@ namespace charity_website_backend.Modules.Project.Services
                 Message = "Project details fetched sccessfully"
             };
         }
-
+        public  IResult<IQueryable<ProjectListDTO>> GetApprovedProjects()
+        {
+            var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Approved).ToList();
+            var data = (from c in projects
+                        select new ProjectListDTO()
+                        {
+                            Id = c.Id,
+                            ImagePath = c.Image_Path,
+                            Title = c.Title,
+                            AmountRaised = c.Amount_Raised,
+                            TargetAmount = c.Target_Amount
+                        }).AsQueryable();
+            return new IResult<IQueryable<ProjectListDTO>>()
+            {
+                Data = data,
+                Status = status.Success
+            };
+        }
+        public IResult<bool> DonateToProject(DonationDTO model, int donorId)
+        {
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                var project = _context.Projects.Find(model.ProjectId);
+                project.Amount_Raised += model.Amount;
+                _context.SaveChanges();
+                var donation = new EDonation()
+                {
+                    Donor_Id = donorId,
+                    Amount = model.Amount,
+                    Date_And_Time = DateTime.Now
+                };
+                _context.Donations.Add(donation);
+                _context.SaveChanges();
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return new IResult<bool>() 
+                {
+                    Status = status.Failure,
+                    Message = "Donation unsuccessful"
+                };
+            }
+            
+            return new IResult<bool>()
+            {
+                Data = true,
+                Status = status.Success,
+                Message = "Donation successful"
+            };
+        }
         public IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId)
         {
             var projects = _context.Projects.Where(x => x.NGO_Id == NGOId).ToList();

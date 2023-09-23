@@ -5,8 +5,16 @@ namespace charity_website_backend.Modules.Project.Services
     public interface IProjectService
     {
         IResult<EProject> Add(ProjectCreateDTO model,int NGOId);
+        IResult<bool> DonateToProject(DonationDTO model, int donorId);
         IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId);
+        IResult<IQueryable<ProjectListDTO>> GetApprovedProjects();
         IResult<ProjectDetailDTO> GetProjectDetails(int projectid);
+    }
+    public class DonationDTO
+    {
+        public int ProjectId { get; set; }
+        public decimal Amount { get; set; }
+    
     }
     public class ProjectCreateDTO
     {

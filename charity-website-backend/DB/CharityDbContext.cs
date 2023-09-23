@@ -12,6 +12,7 @@ namespace charity_website_backend.DB
         public DbSet<EDonor> Donors { get; set; }
         public DbSet<ENGO> NGOs { get; set; }
         public DbSet<EProject> Projects { get; set; }
-
+        public DbSet<EOTP> OTPs { get; set; }
+        
     }
 }
