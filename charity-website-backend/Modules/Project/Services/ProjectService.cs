@@ -86,7 +86,10 @@ namespace charity_website_backend.Modules.Project.Services
             try
             {
                 var project = _context.Projects.Find(model.ProjectId);
+                var donor = _context.Donors.Find(donorId);
                 project.Amount_Raised += model.Amount;
+                _context.SaveChanges();
+                donor.Balance -= model.Amount;
                 _context.SaveChanges();
                 var donation = new EDonation()
                 {

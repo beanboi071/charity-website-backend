@@ -21,7 +21,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
         {
             switch (LoginData.UserType)
             {
-                case '0':
+                case 0:
                     var donor = _context.Donors.FirstOrDefault(x => x.Username == LoginData.Username);
                     if(donor == null || (!BCrypt.Net.BCrypt.Verify(LoginData.Password, donor.Password_Hash)))
                     {
@@ -31,7 +31,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                             Message = "Invalid login credential."
                         };
                     }
-                    string donorToken = CreateToken(donor.Id, '0');
+                    string donorToken = CreateToken(donor.Id, 0);
                     return new IResult<string>()
                     {
                         Data = donorToken,
@@ -39,7 +39,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                         Message = "Login Successful"
                     };
                     break;
-                case '1':
+                case 1:
                     var NGO = _context.NGOs.FirstOrDefault(x => x.Username == LoginData.Username);
                     if (NGO == null || (!BCrypt.Net.BCrypt.Verify(LoginData.Password, NGO.Password_Hash)))
                     {
@@ -49,7 +49,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                             Message = "Invalid login credential."
                         };
                     }
-                    string ngoToken = CreateToken(NGO.Id, '1');
+                    string ngoToken = CreateToken(NGO.Id, 1);
                     return new IResult<string>()
                     {
                         Data = ngoToken,
@@ -66,7 +66,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                 Message = "Login failed."
             };
         }
-        public string CreateToken(int Id, char UserType)
+        public string CreateToken(int Id, int UserType)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.UTF8.GetBytes(_config["JWT:Key"]);
@@ -96,7 +96,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
             }
             switch (SignUpData.UserType)
             {
-                case '0':
+                case 0:
                     var existingDonor = _context.Donors.FirstOrDefault(x=>x.Username == SignUpData.Username);
                     if (existingDonor != null)
                     {
@@ -122,7 +122,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                         Message = "Signup successful"
                     };
                     break;
-                case '1':
+                case 1:
                     var existingNGO = _context.NGOs.FirstOrDefault(x => x.Username == SignUpData.Username);
                     if (existingNGO != null)
                     {

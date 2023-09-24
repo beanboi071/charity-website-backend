@@ -13,12 +13,12 @@ namespace charity_website_backend.Modules.LoginSignup.Services
         public string Email { get; set; }
         public string Password { get; set; }
         public string ConfirmPwd { get; set; }
-        public char UserType { get; set; }
+        public int UserType { get; set; }
     }
     public class LoginDTO
     {
         public string Username { get; set; }
         public string Password { get; set; }
-        public char UserType { get; set; }
+        public int UserType { get; set; }
     } 
 }

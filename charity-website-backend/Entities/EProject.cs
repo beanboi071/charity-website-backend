@@ -16,6 +16,7 @@
     {
         Pending,
         Approved,
-        Completed
+        Completed,
+        Rejected
     }
 }
