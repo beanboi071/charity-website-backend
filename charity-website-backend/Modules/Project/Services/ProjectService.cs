@@ -80,6 +80,24 @@ namespace charity_website_backend.Modules.Project.Services
                 Status = status.Success
             };
         }
+        public IResult<IQueryable<PendingProjectListDTO>> GetPendingProjects()
+        {
+            var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Pending).ToList();
+            var data = (from c in projects
+                        select new PendingProjectListDTO()
+                        {
+                            Id = c.Id,
+                            ImagePath = c.Image_Path,
+                            Title = c.Title,
+                            NGOName = _context.NGOs.Find(c.NGO_Id).Name,
+                            TargetAmount = c.Target_Amount
+                        }).AsQueryable();
+            return new IResult<IQueryable<PendingProjectListDTO>>()
+            {
+                Data = data,
+                Status = status.Success
+            };
+        }
         public IResult<bool> DonateToProject(DonationDTO model, int donorId)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -136,5 +154,7 @@ namespace charity_website_backend.Modules.Project.Services
                 Status = status.Success
             };
         }
+
+        
     }
 }

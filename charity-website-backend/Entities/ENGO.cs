@@ -9,6 +9,8 @@
         public string Password_Hash { get; set; }
         public string? Image_Path { get; set; }
         public decimal Balance { get; set; }
+        public string Website_Link { get; set; }
+        public bool IsEmailVerified { get; set; }
 
     }
 }

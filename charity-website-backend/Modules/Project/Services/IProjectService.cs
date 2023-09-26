@@ -8,6 +8,8 @@ namespace charity_website_backend.Modules.Project.Services
         IResult<bool> DonateToProject(DonationDTO model, int donorId);
         IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId);
         IResult<IQueryable<ProjectListDTO>> GetApprovedProjects();
+        IResult<IQueryable<PendingProjectListDTO>> GetPendingProjects();
+        
         IResult<ProjectDetailDTO> GetProjectDetails(int projectid);
     }
     public class DonationDTO
@@ -22,6 +24,14 @@ namespace charity_website_backend.Modules.Project.Services
         public decimal TargetAmount { get; set; }
         public string Description { get; set; }
         public string ImageBase64 { get; set; }
+    }
+    public class PendingProjectListDTO
+    {
+        public int Id { get; set;}
+        public string? ImagePath { get; set; }
+        public string Title { get; set; }
+        public decimal TargetAmount { get; set; }
+        public string? NGOName { get; set; }
     }
     public class ProjectListDTO
     {

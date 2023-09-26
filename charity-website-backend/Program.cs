@@ -3,6 +3,8 @@ using charity_website_backend.Common.Services;
 using charity_website_backend.DB;
 using charity_website_backend.Modules.LoginSignup.Api;
 using charity_website_backend.Modules.LoginSignup.Services;
+using charity_website_backend.Modules.NGO.Api;
+using charity_website_backend.Modules.NGO.Services;
 using charity_website_backend.Modules.Project.Api;
 using charity_website_backend.Modules.Project.Services;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +56,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<ISessionService, SessionService>();
 builder.RegisterLoginSignupService();
 builder.RegisterProjectService();
+builder.RegisterNGOService();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -71,6 +74,7 @@ if (app.Environment.IsDevelopment())
 }
 app.RegisterLoginSignupApi();
 app.RegisterProjectApi();
+app.RegisterNGOApi();
 app.RegisterCommonApi();
 app.UseHttpsRedirection();
 //app.UseCors("CorsPolicy");
