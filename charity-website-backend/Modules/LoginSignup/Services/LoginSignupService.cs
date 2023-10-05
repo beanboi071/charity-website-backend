@@ -1,9 +1,11 @@
 ﻿using charity_website_backend.Common.Services;
 using charity_website_backend.DB;
 using charity_website_backend.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace charity_website_backend.Modules.LoginSignup.Services
@@ -105,13 +107,13 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                   new Claim("UserType",UserType.ToString(),ClaimValueTypes.Integer)
              }),
 
-                Expires = DateTime.Now.AddHours(3),
+                Expires = DateTime.Now.AddHours(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-            public IResult<bool> SignUpDonor(SignUpDonorDTO SignUpData)
+        public IResult<bool> SignUpDonor(SignUpDonorDTO SignUpData)
         {
             var existingDonor = _context.Donors.FirstOrDefault(x => x.Username == SignUpData.Username);
             if (existingDonor != null)
@@ -147,6 +149,52 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                 Status = status.Success,
                 Message = "Signup successful"
             };
+        }
+        public IResult<bool> ChangePassword(ChangePasswordDTO ChangePasswordData,int UserId,int UserType)
+        {
+            switch (UserType)
+            {
+                case 0:
+                    var donor = _context.Donors.Find(UserId);
+                    if (donor == null || (!BCrypt.Net.BCrypt.Verify(ChangePasswordData.OldPassword, donor.Password_Hash)))
+                    {
+                        return new IResult<bool>()
+                        {
+                            Status = status.Failure,
+                            Message = "Incorrect password."
+                        };
+                    }
+                    donor.Password_Hash = BCrypt.Net.BCrypt.HashPassword(ChangePasswordData.OldPassword);
+                    _context.SaveChanges();
+                    return new IResult<bool>()
+                    {
+                        Status= status.Success,
+                        Message = "Password changed successfully"
+                    };
+                case 1:
+                    var ngo = _context.NGOs.Find(UserId);
+                    if (ngo == null || (!BCrypt.Net.BCrypt.Verify(ChangePasswordData.OldPassword, ngo.Password_Hash)))
+                    {
+                        return new IResult<bool>()
+                        {
+                            Status = status.Failure,
+                            Message = "Incorrect password."
+                        };
+                    }
+                    ngo.Password_Hash = BCrypt.Net.BCrypt.HashPassword(ChangePasswordData.NewPassword);
+                    _context.SaveChanges();
+                    return new IResult<bool>()
+                    {
+                        Status = status.Success,
+                        Message = "Password changed successfully"
+                    };
+                default:
+                    return new IResult<bool>()
+                    {
+                        Status = status.Failure,
+                        Message = "Something went wrong"
+                    };
+            }
         }
         public IResult<bool> SignUpNGO(SignUpNGODTO SignUpData)
         {
@@ -205,6 +253,73 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                         Message = "Signup successful"
                     };
             
+        }
+        public string GenerateOtpCode()
+        {
+            // Define the length of the OTP code
+            int otpLength = 6;
+
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] bytes = new byte[otpLength];
+                rng.GetBytes(bytes);
+
+                // Convert the random bytes to a numeric OTP code
+                int number = BitConverter.ToInt32(bytes, 0) & int.MaxValue;
+
+                // Scale the number to the desired length
+                int maxDigits = (int)Math.Pow(10, otpLength);
+                int otpCode = number % maxDigits;
+
+                // Convert the OTP code to a string and pad it with leading zeros if necessary
+                return otpCode.ToString().PadLeft(otpLength, '0');
+            }
+        }
+
+        public IResult<bool> GetOTP(ResetPasswordDTO ResetPasswordData)
+        {
+            int? UserId = null;
+            switch (ResetPasswordData.UserType)
+            {
+                case 0:
+                    UserId = _context.Donors.FirstOrDefault(x => x.Email == ResetPasswordData.Email).Id;
+                    break;
+                case 1:
+                    UserId = _context.NGOs.FirstOrDefault(x => x.Email == ResetPasswordData.Email).Id;
+                    break;
+                default:
+                    break;
+            }
+            if(UserId == null)
+            {
+                return new IResult<bool> 
+                {
+                    Data = false,
+                    Status = status.Failure,
+                    Message = "User not found."
+                };
+            }
+            var otp = GenerateOtpCode();
+            string htmlTemplate = File.ReadAllText("Common/Template/ResetPasswordTemplate.html");
+
+            string body = string.Format(htmlTemplate, otp);
+            IEmailService mailService = new EmailService(_config);
+            var mailDto = new EmailSendDTO()
+            {
+                To = ResetPasswordData.Email,
+                Subject = "OTP to reset password",
+                Body = body
+            };
+
+            mailService.SendEmail(mailDto);
+            string query = "INSERT INTO OTPs (UserId,UserType,Otp) VALUES (@p0, @p1, @p2);";
+            _context.Database.ExecuteSqlRaw(query, UserId ?? 0, ResetPasswordData.UserType,otp);
+            return new IResult<bool>()
+            {
+                Data = true,
+                Status = status.Success,
+                Message = "OTP sent successfully"
+            };
         }
     }
 }

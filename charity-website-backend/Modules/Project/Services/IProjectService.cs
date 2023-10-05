@@ -8,6 +8,7 @@ namespace charity_website_backend.Modules.Project.Services
         IResult<bool> DonateToProject(DonationDTO model, int donorId);
         IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId);
         IResult<IQueryable<ProjectListDTO>> GetApprovedProjects();
+        IResult<bool> ApproveProject(int ProjectId);
         IResult<IQueryable<PendingProjectListDTO>> GetPendingProjects();
         
         IResult<ProjectDetailDTO> GetProjectDetails(int projectid);

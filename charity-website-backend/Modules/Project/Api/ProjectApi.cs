@@ -15,6 +15,7 @@ namespace charity_website_backend.Modules.Project.Api
             app.MapGet(root + "GetPendingProjects", GetPendingProjects);
             app.MapGet(root + "GetProjectDetails", GetProjectDetails);
             app.MapPost(root + "DonateToProject", DonateToProject);
+            app.MapGet(root + "ApproveProject", ApproveProject);
         }
         private static IResult<bool> DonateToProject(DonationDTO model, IProjectService service, ISessionService sessionService)
         {
@@ -31,6 +32,10 @@ namespace charity_website_backend.Modules.Project.Api
         private static IResult<IQueryable<ProjectListDTO>> GetApprovedProjects(IProjectService service)
         {
             return service.GetApprovedProjects();
+        }
+        private static IResult<bool> ApproveProject(IProjectService service, int projectId)
+        {
+            return service.ApproveProject(projectId);
         }
         private static IResult<IQueryable<PendingProjectListDTO>> GetPendingProjects(IProjectService service, string search = "", int skip = 0, int take = 10)
         {

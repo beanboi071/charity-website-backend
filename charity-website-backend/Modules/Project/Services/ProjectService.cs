@@ -62,6 +62,17 @@ namespace charity_website_backend.Modules.Project.Services
                 Message = "Project details fetched sccessfully"
             };
         }
+        public IResult<bool> ApproveProject(int ProjectId)
+        {
+            var project = _context.Projects.Find(ProjectId);
+            project.Status = ProjectStatus.Approved;
+            _context.SaveChanges();
+            return new IResult<bool>()
+            {
+                Data = true,
+                Status = status.Success,
+            };
+        }
         public  IResult<IQueryable<ProjectListDTO>> GetApprovedProjects()
         {
             var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Approved).ToList();
