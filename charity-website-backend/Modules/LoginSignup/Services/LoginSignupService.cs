@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Net.WebRequestMethods;
 
 namespace charity_website_backend.Modules.LoginSignup.Services
 {
@@ -275,17 +276,70 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                 return otpCode.ToString().PadLeft(otpLength, '0');
             }
         }
-
-        public IResult<bool> GetOTP(ResetPasswordDTO ResetPasswordData)
+        public IResult<bool> VerifyOTP(VerifyOtpDTO model)
+        {
+            int? UserId = null;
+            switch (model.UserType)
+            {
+                case 0:
+                    UserId = _context.Donors.FirstOrDefault(x => x.Email == model.Email)?.Id;
+                    break;
+                case 1:
+                    UserId = _context.NGOs.FirstOrDefault(x => x.Email == model.Email)?.Id;
+                    break;
+                default:
+                    break;
+            }
+            if (UserId == null)
+            {
+                return new IResult<bool>
+                {
+                    Data = false,
+                    Status = status.Failure,
+                    Message = "User not found."
+                };
+            }
+            var otp = _context.OTPs.FirstOrDefault(x => x.UserId == UserId && x.UserType == model.UserType && x.Otp == model.OTP);
+            if(otp != null)
+            {
+                if (DateTime.Now > otp.ExpiryTime)
+                {
+                    string query = "DELETE FROM OTPs WHERE UserId = @p0 AND UserType = @p1;";
+                    _context.Database.ExecuteSqlRaw(query, otp.UserId,otp.UserType );
+                    return new IResult<bool>()
+                    {
+                        Data = false,
+                        Message = "OTP Expired",
+                        Status = status.Failure
+                    };
+                }
+                string DeleteQuery = "DELETE FROM OTPs WHERE UserId = @p0 AND UserType = @p1;";
+                _context.Database.ExecuteSqlRaw(DeleteQuery, otp.UserId, otp.UserType);
+                return new IResult<bool>
+                {
+                    Data = true,
+                    Message = "OTP verified",
+                    Status = status.Success
+                };
+            }
+            
+            return new IResult<bool>
+            {
+                Data = false,
+                Message = "Failed to verify OTP",
+                Status = status.Failure
+            };
+        }
+            public IResult<bool> GetOTP(ResetPasswordDTO ResetPasswordData)
         {
             int? UserId = null;
             switch (ResetPasswordData.UserType)
             {
                 case 0:
-                    UserId = _context.Donors.FirstOrDefault(x => x.Email == ResetPasswordData.Email).Id;
+                    UserId = _context.Donors.FirstOrDefault(x => x.Email == ResetPasswordData.Email)?.Id;
                     break;
                 case 1:
-                    UserId = _context.NGOs.FirstOrDefault(x => x.Email == ResetPasswordData.Email).Id;
+                    UserId = _context.NGOs.FirstOrDefault(x => x.Email == ResetPasswordData.Email)?.Id;
                     break;
                 default:
                     break;
@@ -300,7 +354,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                 };
             }
             var otp = GenerateOtpCode();
-            string htmlTemplate = File.ReadAllText("Common/Template/ResetPasswordTemplate.html");
+            string htmlTemplate = System.IO.File.ReadAllText("Common/Template/ResetPasswordTemplate.html");
 
             string body = string.Format(htmlTemplate, otp);
             IEmailService mailService = new EmailService(_config);
@@ -312,13 +366,38 @@ namespace charity_website_backend.Modules.LoginSignup.Services
             };
 
             mailService.SendEmail(mailDto);
-            string query = "INSERT INTO OTPs (UserId,UserType,Otp) VALUES (@p0, @p1, @p2);";
-            _context.Database.ExecuteSqlRaw(query, UserId ?? 0, ResetPasswordData.UserType,otp);
+            string DeleteQuery = "DELETE FROM OTPs WHERE UserId = @p0 AND UserType = @p1;";
+            _context.Database.ExecuteSqlRaw(DeleteQuery, UserId ?? 0, ResetPasswordData.UserType);
+            string query = "INSERT INTO OTPs (UserId,UserType,Otp,ExpiryTime) VALUES (@p0, @p1, @p2,@p3);";
+            _context.Database.ExecuteSqlRaw(query, UserId ?? 0, ResetPasswordData.UserType,otp,DateTime.Now.AddMinutes(1));
             return new IResult<bool>()
             {
                 Data = true,
                 Status = status.Success,
                 Message = "OTP sent successfully"
+            };
+        }
+
+        public IResult<bool> DeleteOTP(int UserType, string Email)
+        {
+            int? UserId = null;
+            switch (UserType)
+            {
+                case 0:
+                    UserId = _context.Donors.FirstOrDefault(x => x.Email == Email)?.Id;
+                    break;
+                case 1:
+                    UserId = _context.NGOs.FirstOrDefault(x => x.Email == Email)?.Id;
+                    break;
+                default:
+                    break;
+            }
+            string query = "DELETE FROM OTPs WHERE UserId = @p0 AND UserType = @p1;";
+            _context.Database.ExecuteSqlRaw(query, UserId, UserType);
+            return new IResult<bool>
+            {
+                Data = true,
+                Status = status.Success
             };
         }
     }

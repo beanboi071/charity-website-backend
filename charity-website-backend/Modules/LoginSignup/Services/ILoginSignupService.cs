@@ -5,7 +5,9 @@ namespace charity_website_backend.Modules.LoginSignup.Services
     public interface ILoginSignupService
     {
         IResult<bool> SignUpDonor(SignUpDonorDTO SignUpData);
+        IResult<bool> DeleteOTP(int UserType, string Email);
         IResult<bool> GetOTP(ResetPasswordDTO ResetPasswordData);
+        IResult<bool> VerifyOTP(VerifyOtpDTO VerifyOtpData);
         IResult<bool> ChangePassword(ChangePasswordDTO ChangePasswordData, int UserId, int UserType);
         IResult<bool> SignUpNGO(SignUpNGODTO SignUpData);
         IResult<string> Login(LoginDTO LoginData);
@@ -48,5 +50,11 @@ namespace charity_website_backend.Modules.LoginSignup.Services
     {
         public string Email { get; set; }
         public int UserType { get; set; }
+    }
+    public class VerifyOtpDTO
+    {
+        public string Email { get; set; }
+        public int UserType { get; set; }
+        public string OTP{ get; set; }
     }
 }

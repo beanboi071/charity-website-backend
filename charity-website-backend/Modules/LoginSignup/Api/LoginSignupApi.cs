@@ -15,6 +15,13 @@ namespace charity_website_backend.Modules.LoginSignup.Api
             app.MapPost(root + "AdminLogin", AdminLogin).AllowAnonymous();
             app.MapPost(root + "ChangePassword", ChangePassword);
             app.MapPost(root + "GetOTP", GetOTP).AllowAnonymous();
+            app.MapPost(root + "VerifyOTP", VerifyOTP).AllowAnonymous();
+            app.MapGet(root + "DeleteOTP", DeleteOTP).AllowAnonymous();
+
+        }
+        private static IResult<bool> DeleteOTP(ILoginSignupService service, int UserType, string Email)
+        {
+            return service.DeleteOTP(UserType, Email);
         }
         private static IResult<bool> SignUpDonor(SignUpDonorDTO SignupData,ILoginSignupService service)
         {
@@ -23,6 +30,10 @@ namespace charity_website_backend.Modules.LoginSignup.Api
         private static IResult<bool> GetOTP(ResetPasswordDTO ResetPasswordData, ILoginSignupService service)
         {
             return service.GetOTP(ResetPasswordData);
+        }
+        private static IResult<bool> VerifyOTP(VerifyOtpDTO VerifyOtpData, ILoginSignupService service)
+        {
+            return service.VerifyOTP(VerifyOtpData);
         }
         private static IResult<bool> ChangePassword(ChangePasswordDTO ChangePasswordData, ILoginSignupService service, ISessionService sessionService)
         {
