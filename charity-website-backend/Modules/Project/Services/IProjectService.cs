@@ -1,4 +1,5 @@
-﻿using charity_website_backend.Entities;
+﻿using charity_website_backend.Common.Model;
+using charity_website_backend.Entities;
 
 namespace charity_website_backend.Modules.Project.Services
 {
@@ -6,10 +7,10 @@ namespace charity_website_backend.Modules.Project.Services
     {
         IResult<EProject> Add(ProjectCreateDTO model,int NGOId);
         IResult<bool> DonateToProject(DonationDTO model, int donorId);
-        IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId);
-        IResult<IQueryable<ProjectListDTO>> GetApprovedProjects();
+        IResult<ListVM<ProjectListDTO>> GetProjectsByNGOId(int NGOId,string search,int skip,int take);
+        IResult<ListVM<ProjectListDTO>> GetApprovedProjects(string search,string ngoName, int skip, int take);
         IResult<bool> ApproveProject(int ProjectId);
-        IResult<IQueryable<PendingProjectListDTO>> GetPendingProjects();
+        IResult<ListVM<PendingProjectListDTO>> GetPendingProjects(string search,string ngoName, int skip, int take);
         
         IResult<ProjectDetailDTO> GetProjectDetails(int projectid);
     }

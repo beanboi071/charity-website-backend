@@ -63,20 +63,21 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                     break;
                 case 1:
                     var NGO = _context.NGOs.FirstOrDefault(x => x.Username == LoginData.Username);
-                    if (!NGO.IsEmailVerified)
-                    {
-                        return new IResult<string>()
-                        {
-                            Status = status.Failure,
-                            Message = "Please verify your email."
-                        };
-                    }
+                    
                     if (NGO == null || (!BCrypt.Net.BCrypt.Verify(LoginData.Password, NGO.Password_Hash)))
                     {
                         return new IResult<string>()
                         {
                             Status = status.Failure,
                             Message = "Invalid login credential."
+                        };
+                    }
+                    if (!NGO.IsEmailVerified)
+                    {
+                        return new IResult<string>()
+                        {
+                            Status = status.Failure,
+                            Message = "Please verify your email."
                         };
                     }
                     string ngoToken = CreateToken(NGO.Id, 1);

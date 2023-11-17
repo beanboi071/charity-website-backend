@@ -1,4 +1,5 @@
-﻿using charity_website_backend.Common.Services;
+﻿using charity_website_backend.Common.Model;
+using charity_website_backend.Common.Services;
 using charity_website_backend.Entities;
 using charity_website_backend.Modules.Project.Services;
 
@@ -29,23 +30,23 @@ namespace charity_website_backend.Modules.Project.Api
             int NGOId = session.Id;
             return service.Add(model, NGOId);
         }
-        private static IResult<IQueryable<ProjectListDTO>> GetApprovedProjects(IProjectService service)
+        private static IResult<ListVM<ProjectListDTO>> GetApprovedProjects(IProjectService service, string search = "",string ngoName = "", int skip = 0,int take = 10)
         {
-            return service.GetApprovedProjects();
+            return service.GetApprovedProjects(search.ToLower(),ngoName.ToLower(),skip,take);
         }
         private static IResult<bool> ApproveProject(IProjectService service, int projectId)
         {
             return service.ApproveProject(projectId);
         }
-        private static IResult<IQueryable<PendingProjectListDTO>> GetPendingProjects(IProjectService service, string search = "", int skip = 0, int take = 10)
+        private static IResult<ListVM<PendingProjectListDTO>> GetPendingProjects(IProjectService service, string search = "",string ngoName = "", int skip = 0, int take = 10)
         {
-            return service.GetPendingProjects();
+            return service.GetPendingProjects(search.ToLower(),ngoName.ToLower(), skip, take);
         }
-        private static IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(IProjectService service, ISessionService sessionService)
+        private static IResult<ListVM<ProjectListDTO>> GetProjectsByNGOId(IProjectService service, ISessionService sessionService, string search = "", int skip = 0, int take = 10)
         {
             var session = sessionService.GetSession();
             int NGOId = session.Id;
-            return service.GetProjectsByNGOId(NGOId);
+            return service.GetProjectsByNGOId(NGOId, search.ToLower(), skip, take);
 
         }
         private static IResult<ProjectDetailDTO> GetProjectDetails(IProjectService service, int projectId)

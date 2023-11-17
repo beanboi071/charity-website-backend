@@ -1,6 +1,8 @@
 using charity_website_backend.Common.API;
 using charity_website_backend.Common.Services;
 using charity_website_backend.DB;
+using charity_website_backend.Modules.Donor.Api;
+using charity_website_backend.Modules.Donor.Services;
 using charity_website_backend.Modules.LoginSignup.Api;
 using charity_website_backend.Modules.LoginSignup.Services;
 using charity_website_backend.Modules.NGO.Api;
@@ -53,10 +55,11 @@ builder.Services.AddEndpointsApiExplorer(); builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.AddDbContextPool<CharityDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("CharityDBConnection")));
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddTransient<ISessionService, SessionService>();
+builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.RegisterLoginSignupService();
 builder.RegisterProjectService();
 builder.RegisterNGOService();
+builder.RegisterDonorService();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -76,6 +79,7 @@ app.RegisterLoginSignupApi();
 app.RegisterProjectApi();
 app.RegisterNGOApi();
 app.RegisterCommonApi();
+app.RegisterDonorApi();
 app.UseHttpsRedirection();
 //app.UseCors("CorsPolicy");
 

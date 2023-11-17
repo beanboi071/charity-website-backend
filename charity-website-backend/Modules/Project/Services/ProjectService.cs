@@ -1,4 +1,5 @@
-﻿using charity_website_backend.Common.Services;
+﻿using charity_website_backend.Common.Model;
+using charity_website_backend.Common.Services;
 using charity_website_backend.DB;
 using charity_website_backend.Entities;
 
@@ -73,39 +74,59 @@ namespace charity_website_backend.Modules.Project.Services
                 Status = status.Success,
             };
         }
-        public  IResult<IQueryable<ProjectListDTO>> GetApprovedProjects()
+        public  IResult<ListVM<ProjectListDTO>> GetApprovedProjects(string search,string ngoName, int skip, int take)
         {
-            var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Approved).ToList();
-            var data = (from c in projects
-                        select new ProjectListDTO()
-                        {
-                            Id = c.Id,
-                            ImagePath = c.Image_Path,
-                            Title = c.Title,
-                            AmountRaised = c.Amount_Raised,
-                            TargetAmount = c.Target_Amount
-                        }).AsQueryable();
-            return new IResult<IQueryable<ProjectListDTO>>()
+            List<ProjectListDTO> datalist = new List<ProjectListDTO>();
+            var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Approved && x.Title.ToLower().Contains(search)).ToList();
+            var filteredProjects = projects.Where(x => _context.NGOs.Find(x.NGO_Id)?.Name.ToLower().Contains(ngoName) ?? false).ToList();
+            if (filteredProjects.Any())
             {
-                Data = data,
+                var data = (from c in filteredProjects.Skip(skip).Take(take)
+                            select new ProjectListDTO()
+                            {
+                                Id = c.Id,
+                                ImagePath = c.Image_Path,
+                                Title = c.Title,
+                                AmountRaised = c.Amount_Raised,
+                                TargetAmount = c.Target_Amount
+                            }).AsQueryable();
+                datalist.AddRange(data);
+            }
+            return new IResult<ListVM<ProjectListDTO>>()
+            {
+                Data = new ListVM<ProjectListDTO>(){
+                    list = datalist,
+                    count = filteredProjects.Count
+                },
                 Status = status.Success
             };
         }
-        public IResult<IQueryable<PendingProjectListDTO>> GetPendingProjects()
+        public IResult<ListVM<PendingProjectListDTO>> GetPendingProjects(string search,string ngoName, int skip, int take)
         {
-            var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Pending).ToList();
-            var data = (from c in projects
-                        select new PendingProjectListDTO()
-                        {
-                            Id = c.Id,
-                            ImagePath = c.Image_Path,
-                            Title = c.Title,
-                            NGOName = _context.NGOs.Find(c.NGO_Id).Name,
-                            TargetAmount = c.Target_Amount
-                        }).AsQueryable();
-            return new IResult<IQueryable<PendingProjectListDTO>>()
+            List<PendingProjectListDTO> datalist = new List<PendingProjectListDTO>();
+            var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Pending && x.Title.ToLower().Contains(search)).ToList();
+            var filteredProjects = projects.Where(x => _context.NGOs.Find(x.NGO_Id)?.Name.ToLower().Contains(ngoName)??false).ToList();
+            if (filteredProjects.Any())
             {
-                Data = data,
+                var data = (from c in filteredProjects.Skip(skip).Take(take)
+                            select new PendingProjectListDTO()
+                            {
+                                Id = c.Id,
+                                ImagePath = c.Image_Path??"",
+                                Title = c.Title,
+                                NGOName = _context.NGOs.Find(c.NGO_Id)?.Name??"",
+                                TargetAmount = c.Target_Amount
+                            }).AsQueryable();
+                datalist.AddRange(data);
+            }
+            
+            return new IResult<ListVM<PendingProjectListDTO>>()
+            {
+                Data = new ListVM<PendingProjectListDTO>()
+                {
+                    list=datalist,
+                    count = filteredProjects.Count
+                },
                 Status = status.Success
             };
         }
@@ -147,10 +168,11 @@ namespace charity_website_backend.Modules.Project.Services
                 Message = "Donation successful"
             };
         }
-        public IResult<IQueryable<ProjectListDTO>> GetProjectsByNGOId(int NGOId)
+        public IResult<ListVM<ProjectListDTO>> GetProjectsByNGOId(int NGOId,string search,int skip,int take)
         {
-            var projects = _context.Projects.Where(x => x.NGO_Id == NGOId).ToList();
-            var data = (from c in projects
+            List<ProjectListDTO> datalist = new List<ProjectListDTO>();
+            var projects = _context.Projects.Where(x => x.NGO_Id == NGOId && x.Title.ToLower().Contains(search)).ToList();
+            var data = (from c in projects.Skip(skip).Take(take)
                         select new ProjectListDTO()
                         {
                             Id = c.Id,
@@ -159,9 +181,14 @@ namespace charity_website_backend.Modules.Project.Services
                             AmountRaised = c.Amount_Raised,
                             TargetAmount = c.Target_Amount
                         }).AsQueryable();
-            return new IResult<IQueryable<ProjectListDTO>>()
+            datalist.AddRange(data);
+            return new IResult<ListVM<ProjectListDTO>>()
             {
-                Data = data,
+                Data = new ListVM<ProjectListDTO>()
+                {
+                    list = datalist,
+                    count = projects.Count
+                },
                 Status = status.Success
             };
         }
