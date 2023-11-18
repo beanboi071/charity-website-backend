@@ -2,6 +2,7 @@
 using charity_website_backend.Common.Services;
 using charity_website_backend.DB;
 using charity_website_backend.Entities;
+using System.Diagnostics;
 
 namespace charity_website_backend.Modules.Project.Services
 {
@@ -139,13 +140,19 @@ namespace charity_website_backend.Modules.Project.Services
                 var donor = _context.Donors.Find(donorId);
                 project.Amount_Raised += model.Amount;
                 _context.SaveChanges();
+                if(project.Amount_Raised >= project.Target_Amount)
+                {
+                    project.Status = ProjectStatus.Completed;
+                    _context.SaveChanges();
+                }
                 donor.Balance -= model.Amount;
                 _context.SaveChanges();
                 var donation = new EDonation()
                 {
                     Donor_Id = donorId,
                     Amount = model.Amount,
-                    Date_And_Time = DateTime.Now
+                    Date_And_Time = DateTime.Now,
+                    Project_Id = project.Id
                 };
                 _context.Donations.Add(donation);
                 _context.SaveChanges();
@@ -193,6 +200,46 @@ namespace charity_website_backend.Modules.Project.Services
             };
         }
 
-        
+        public IResult<ListVM<DonationHistoryVM>> GetDonationHistory(string projectName, string ngoName, string donorName, int skip, int take)
+        {
+            List<DonationHistoryVM> list = new List<DonationHistoryVM>();
+            var projects = _context.Projects.ToList();
+            var ngos = _context.NGOs.ToList();
+            var donors = _context.Donors.ToList();
+            var donations = _context.Donations.ToList();
+            var dataList = (from dns in donations
+                         join p in projects on dns.Project_Id equals p.Id into dnsp
+                         from dp in dnsp
+                         join n in ngos on dp.NGO_Id equals n.Id into dpn
+                         from dpns in dpn
+                         join d in donors on dns.Donor_Id equals d.Id
+                         select new DonationHistoryVM()
+                         {
+                             Id = dns.Id,
+                             Amount = dns.Amount,
+                             DateTime = dns.Date_And_Time,
+                             DonorId = d.Id,
+                             DonorUsername = d.Username,
+                             NGOId = dpns.Id,
+                             NGOUsername = dpns.Username,
+                             ProjectId = dp.Id,
+                             ProjectName = dp.Title,
+                             ProjectImg = dp.Image_Path
+                         }).ToList();
+            var datas = dataList.Where(x => x.NGOUsername.ToLower().Contains(ngoName) && x.ProjectName.ToLower().Contains(projectName) && x.DonorUsername.ToLower().Contains(donorName)).OrderByDescending(x=>x.DateTime).ToList();
+            list.AddRange(datas.Skip(skip).Take(take));
+            ListVM<DonationHistoryVM> dataModel = new ListVM<DonationHistoryVM>()
+            {
+                list = list,
+                count = datas.Count
+            };
+            return new IResult<ListVM<DonationHistoryVM>>()
+            {
+                Data = dataModel,
+                Status = status.Success,
+                Message = "Donation history retrieved successfully"
+            };
+
+        }
     }
 }

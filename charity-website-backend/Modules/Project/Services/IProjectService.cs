@@ -13,12 +13,27 @@ namespace charity_website_backend.Modules.Project.Services
         IResult<ListVM<PendingProjectListDTO>> GetPendingProjects(string search,string ngoName, int skip, int take);
         
         IResult<ProjectDetailDTO> GetProjectDetails(int projectid);
+        IResult<ListVM<DonationHistoryVM>> GetDonationHistory(string projectName, string ngoName, string donorName, int skip, int take);
     }
     public class DonationDTO
     {
         public int ProjectId { get; set; }
         public decimal Amount { get; set; }
     
+    }
+    public class DonationHistoryVM
+    {
+        public int Id { get; set; }
+        public int DonorId { get; set; }
+        public string DonorUsername { get; set; }
+        public int NGOId { get; set; }
+        public string NGOUsername { get; set; }
+        public decimal Amount { get; set; }
+        public DateTime DateTime { get; set; }
+        public int ProjectId { get; set; }
+        public string ProjectName { get; set; }
+        public string ProjectImg { get; set; }
+        
     }
     public class ProjectCreateDTO
     {

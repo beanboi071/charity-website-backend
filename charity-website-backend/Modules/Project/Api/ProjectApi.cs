@@ -17,6 +17,7 @@ namespace charity_website_backend.Modules.Project.Api
             app.MapGet(root + "GetProjectDetails", GetProjectDetails);
             app.MapPost(root + "DonateToProject", DonateToProject);
             app.MapGet(root + "ApproveProject", ApproveProject);
+            app.MapGet(root + "GetDonationHistory", GetDonationHistory);
         }
         private static IResult<bool> DonateToProject(DonationDTO model, IProjectService service, ISessionService sessionService)
         {
@@ -52,6 +53,10 @@ namespace charity_website_backend.Modules.Project.Api
         private static IResult<ProjectDetailDTO> GetProjectDetails(IProjectService service, int projectId)
         {
             return service.GetProjectDetails(projectId);
+        }
+        private static IResult<ListVM<DonationHistoryVM>> GetDonationHistory(IProjectService service, string projectName = "", string ngoName = "", string donorName = "",int skip = 0, int take = 12)
+        {
+            return service.GetDonationHistory(donorName, ngoName, projectName, skip, take);
         }
     }
 }
