@@ -3,15 +3,12 @@
    
         public interface ISessionService
         {
-            ISessionService Session { get; }
-            public CharitySession GetSession();
-        }
+        public HttpContext? HttpContext { get; }
+        public IConfiguration Configuration { get; }
+        public int Id { get; }
+        public int UserType { get; }
 
-        public class CharitySession
-        {
-            public int Id { get; set; }
-            public int UserType { get; set; }
+    }
 
-        }
     
 }

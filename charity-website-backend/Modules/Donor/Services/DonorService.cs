@@ -54,16 +54,25 @@ namespace charity_website_backend.Modules.Donor.Services
                     Message = "This email is already bound to an account"
                 };
             }
-            if (model.Image_Path.StartsWith("data:image/"))
+            if(model.Image_Path != null)
             {
-                if (!donor.Image_Path.IsNullOrEmpty())
+                if(model.Image_Path == "")
                 {
                     donor.Image_Path.DeleteFile();
+                    donor.Image_Path = null;        
                 }
-                var fileName = model.Image_Path.ToFileUrl("Donor", Guid.NewGuid().ToString());
-                donor.Image_Path = fileName;
-                
+                if (model.Image_Path.StartsWith("data:image/"))
+                {
+                    if (!donor.Image_Path.IsNullOrEmpty())
+                    {
+                        donor.Image_Path.DeleteFile();
+                    }
+                    var fileName = model.Image_Path.ToFileUrl("Donor", Guid.NewGuid().ToString());
+                    donor.Image_Path = fileName;
+
+                }
             }
+            
             donor.Username = model.Username;
             donor.Name = model.Name;
             donor.Email = model.Email;

@@ -13,7 +13,6 @@ namespace charity_website_backend.Modules.Project.Services
         {
             _context = context;
         }
-
         public IResult<EProject> Add(ProjectCreateDTO model, int NGOId)
         {
             var projectData = new EProject()
@@ -38,24 +37,28 @@ namespace charity_website_backend.Modules.Project.Services
             _context.SaveChanges();
             return new IResult<EProject>()
             {
-                Status = status.Success
+                Status = status.Success,
+                Message = "Project created successfully."
             };
         }
-
         public IResult<ProjectDetailDTO> GetProjectDetails(int projectid)
         {
             var data = _context.Projects.Find(projectid);
+            var ngo = _context.NGOs.Find(data.NGO_Id);
             var projectDetails = new ProjectDetailDTO()
             {
                 Id = data.Id,
                 Title = data.Title,
-                ImagePath = data.Image_Path,
+                ImagePath = data.Image_Path?? "Default\\Project.jpg",
                 NGOId = data.NGO_Id,
                 Description = data.Description,
                 AmountRaised = data.Amount_Raised,
                 CreatedDateTime = data.Created_Date_And_Time.ToString(),
                 Status = data.Status,
                 TargetAmount = data.Target_Amount,
+                NGOName = ngo.Name,
+                Website_Link = ngo.Website_Link,
+                NGOUsername = ngo.Username
             };
             return new IResult<ProjectDetailDTO>()
             {
@@ -73,6 +76,7 @@ namespace charity_website_backend.Modules.Project.Services
             {
                 Data = true,
                 Status = status.Success,
+                Message = "Project approved successfully."
             };
         }
         public  IResult<ListVM<ProjectListDTO>> GetApprovedProjects(string search,string ngoName, int skip, int take)
@@ -86,7 +90,7 @@ namespace charity_website_backend.Modules.Project.Services
                             select new ProjectListDTO()
                             {
                                 Id = c.Id,
-                                ImagePath = c.Image_Path,
+                                ImagePath = c.Image_Path ?? "Default\\Project.jpg",
                                 Title = c.Title,
                                 AmountRaised = c.Amount_Raised,
                                 TargetAmount = c.Target_Amount
@@ -102,18 +106,18 @@ namespace charity_website_backend.Modules.Project.Services
                 Status = status.Success
             };
         }
-        public IResult<ListVM<PendingProjectListDTO>> GetPendingProjects(string search,string ngoName, int skip, int take)
+        public IResult<ListVM<ProjectListDTO>> GetPendingProjects(string search,string ngoName, int skip, int take)
         {
-            List<PendingProjectListDTO> datalist = new List<PendingProjectListDTO>();
+            List<ProjectListDTO> datalist = new List<ProjectListDTO>();
             var projects = _context.Projects.Where(x => x.Status == ProjectStatus.Pending && x.Title.ToLower().Contains(search)).ToList();
             var filteredProjects = projects.Where(x => _context.NGOs.Find(x.NGO_Id)?.Name.ToLower().Contains(ngoName)??false).ToList();
             if (filteredProjects.Any())
             {
                 var data = (from c in filteredProjects.Skip(skip).Take(take)
-                            select new PendingProjectListDTO()
+                            select new ProjectListDTO()
                             {
                                 Id = c.Id,
-                                ImagePath = c.Image_Path??"",
+                                ImagePath = c.Image_Path?? "Default\\Project.jpg",
                                 Title = c.Title,
                                 NGOName = _context.NGOs.Find(c.NGO_Id)?.Name??"",
                                 TargetAmount = c.Target_Amount
@@ -121,9 +125,9 @@ namespace charity_website_backend.Modules.Project.Services
                 datalist.AddRange(data);
             }
             
-            return new IResult<ListVM<PendingProjectListDTO>>()
+            return new IResult<ListVM<ProjectListDTO>>()
             {
-                Data = new ListVM<PendingProjectListDTO>()
+                Data = new ListVM<ProjectListDTO>()
                 {
                     list=datalist,
                     count = filteredProjects.Count
@@ -183,7 +187,7 @@ namespace charity_website_backend.Modules.Project.Services
                         select new ProjectListDTO()
                         {
                             Id = c.Id,
-                            ImagePath = c.Image_Path,
+                            ImagePath = c.Image_Path ?? "Default\\Project.jpg",
                             Title = c.Title,
                             AmountRaised = c.Amount_Raised,
                             TargetAmount = c.Target_Amount
@@ -217,7 +221,7 @@ namespace charity_website_backend.Modules.Project.Services
                          {
                              Id = dns.Id,
                              Amount = dns.Amount,
-                             DateTime = dns.Date_And_Time,
+                             DateTime = dns.Date_And_Time.ToString("dddd, dd MMMM yyyy"),
                              DonorId = d.Id,
                              DonorUsername = d.Username,
                              NGOId = dpns.Id,

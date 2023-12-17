@@ -16,14 +16,12 @@ namespace charity_website_backend.Modules.Donor.Api
         }
         private static IResult<DonorProfileVM> GetUserProfile(IDonorService service, ISessionService sessionService)
         {
-            var session = sessionService.GetSession();
-            int UserId = session.Id;
+            int UserId = sessionService.Id;
             return service.GetUserProfile(UserId);
         }
         private static IResult<int> UpdateUserProfile(IDonorService service, ISessionService sessionService, DonorProfileVM model)
         {
-            var session = sessionService.GetSession();
-            int UserId = session.Id;
+            int UserId = sessionService.Id;
             return service.UpdateUserProfile(model,UserId);
         }
     }

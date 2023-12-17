@@ -37,9 +37,8 @@ namespace charity_website_backend.Modules.LoginSignup.Api
         }
         private static IResult<bool> ChangePassword(ChangePasswordDTO ChangePasswordData, ILoginSignupService service, ISessionService sessionService)
         {
-            var session = sessionService.GetSession();
-            int UserId = session.Id;
-            int UserType = session.UserType;
+            int UserId = sessionService.Id;
+            int UserType = sessionService.UserType;
             return service.ChangePassword(ChangePasswordData,UserId, UserType);
         }
         private static IResult<bool> SignUpNGO(SignUpNGODTO SignupData, ILoginSignupService service)

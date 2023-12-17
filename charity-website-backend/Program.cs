@@ -54,8 +54,8 @@ builder.Services.AddEndpointsApiExplorer(); builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddDbContextPool<CharityDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("CharityDBConnection")));
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddSingleton<ISessionService, SessionService>();
+builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddTransient<ISessionService, SessionService>();
 builder.RegisterLoginSignupService();
 builder.RegisterProjectService();
 builder.RegisterNGOService();

@@ -7,23 +7,23 @@ namespace charity_website_backend.Common.Services
 {
     public class SessionService:ISessionService
     {
-        IHttpContextAccessor _httpContextAccessor;
-        IConfiguration _config;
-        List<Claim> claims;
-        public CharitySession CharitySession = new CharitySession();
-
-        public ISessionService Session => this;
-
-        public SessionService(IHttpContextAccessor httpContextAccessor, IConfiguration config)
+    
+        public HttpContext? HttpContext { get; }
+        public IConfiguration Configuration { get; }
+        public int Id { get; }
+        public int UserType{ get; }
+ 
+        public SessionService(IHttpContextAccessor accessor, IConfiguration config)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _config = config;
-            GetPrincipalFromExpiredToken(GetBearerToken());
-        }
-        private List<Claim> GetPrincipalFromExpiredToken(string token)
-        {
-            var Key = Encoding.UTF8.GetBytes(_config["JWT:Key"]);
+            this.HttpContext = accessor.HttpContext;
+            this.Configuration = config;
 
+
+            var Key = Encoding.UTF8.GetBytes(Configuration["JWT:Key"]);
+            var token = this.HttpContext.Request
+                                .Headers["Authorization"]
+                                .ToString()
+                                .Substring("Bearer ".Length);
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = false,
@@ -31,7 +31,7 @@ namespace charity_website_backend.Common.Services
                 ValidateLifetime = false,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Key),
-                
+                ClockSkew = TimeSpan.Zero
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -44,33 +44,18 @@ namespace charity_website_backend.Common.Services
             {
                 throw new SecurityTokenException("Invalid token");
             }
-            claims = principal.Claims.ToList();
+            var claims = principal.Claims.ToList();
 
-            ParseSession();
-            return claims;
-        }
 
-        private string GetBearerToken()
-        {
-            var token = _httpContextAccessor
-                            .HttpContext.Request
-                                .Headers["Authorization"]
-                                .ToString()
-                                .Substring("Bearer ".Length);
-            return token;
-
-        }
-        private void ParseSession()
-        {
-            int.TryParse(claims.Where(x => x.Type == "Id").First().Value, out int i);
-            CharitySession.Id = i;
+            //claims.Where(x => x.Type == "branchId").First().Value, out int b);
+            int.TryParse(claims.Where(x => x.Type == "Id").First().Value, out int b);
+            this.Id = b;
             int.TryParse(claims.Where(x => x.Type == "UserType").First().Value, out int u);
-            CharitySession.UserType = u;
+            this.UserType = u;
         }
-
-        public CharitySession GetSession()
+        public HttpContext GetContext(IHttpContextAccessor accessor)
         {
-            return CharitySession;
+            return this.HttpContext;
         }
     }
 }
