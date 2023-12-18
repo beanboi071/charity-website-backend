@@ -15,7 +15,7 @@ namespace charity_website_backend.Common.Services
  
         public SessionService(IHttpContextAccessor accessor, IConfiguration config)
         {
-            this.HttpContext = accessor.HttpContext;
+            this.HttpContext = accessor.HttpContext ?? throw new ArgumentNullException(nameof(accessor.HttpContext));
             this.Configuration = config;
 
 
@@ -53,7 +53,7 @@ namespace charity_website_backend.Common.Services
             int.TryParse(claims.Where(x => x.Type == "UserType").First().Value, out int u);
             this.UserType = u;
         }
-        public HttpContext GetContext(IHttpContextAccessor accessor)
+        public HttpContext GetCurrentContext()
         {
             return this.HttpContext;
         }
