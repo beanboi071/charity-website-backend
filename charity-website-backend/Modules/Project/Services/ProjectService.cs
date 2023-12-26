@@ -15,6 +15,14 @@ namespace charity_website_backend.Modules.Project.Services
         }
         public IResult<EProject> Add(ProjectCreateDTO model, int NGOId)
         {
+            if(model.TargetAmount <= 0)
+            {
+                return new IResult<EProject>()
+                {
+                    Status = status.Failure,
+                    Message = "Invalid amount."
+                };
+            }
             var projectData = new EProject()
             {
                 Title = model.Title,
@@ -140,17 +148,40 @@ namespace charity_website_backend.Modules.Project.Services
             using var transaction = _context.Database.BeginTransaction();
             try
             {
+                if(model.Amount <= 0)
+                {
+                    return new IResult<bool>()
+                    {
+                        Status = status.Failure,
+                        Message = "Invalid amount"
+                    };
+                }
                 var project = _context.Projects.Find(model.ProjectId);
                 var donor = _context.Donors.Find(donorId);
+                if ((donor.Balance - model.Amount) < 0)
+                {
+                    return new IResult<bool>()
+                    {
+                        Status = status.Failure,
+                        Message = "Insufficient balance"
+                    };
+                }
+                donor.Balance -= model.Amount;
+                _context.SaveChanges();
                 project.Amount_Raised += model.Amount;
+                _context.Projects.Update(project);
+                _context.SaveChanges();
+
+                var ngo = _context.NGOs.Find(project.NGO_Id);
+                ngo.Balance += model.Amount;
+                _context.NGOs.Update(ngo);
                 _context.SaveChanges();
                 if(project.Amount_Raised >= project.Target_Amount)
                 {
                     project.Status = ProjectStatus.Completed;
                     _context.SaveChanges();
                 }
-                donor.Balance -= model.Amount;
-                _context.SaveChanges();
+                
                 var donation = new EDonation()
                 {
                     Donor_Id = donorId,
@@ -168,7 +199,7 @@ namespace charity_website_backend.Modules.Project.Services
                 return new IResult<bool>() 
                 {
                     Status = status.Failure,
-                    Message = "Donation unsuccessful"
+                    Message = "Insufficient balance"
                 };
             }
             

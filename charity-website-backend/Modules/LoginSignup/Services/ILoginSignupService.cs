@@ -12,6 +12,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
         IResult<bool> SignUpNGO(SignUpNGODTO SignUpData);
         IResult<string> Login(LoginDTO LoginData);
         IResult<string> AdminLogin(AdminLoginDTO LoginData);
+        IResult<bool> RecoverPassword(RecoverPasswordDTO model);
     }
    public class SignUpDonorDTO
     {
@@ -48,6 +49,12 @@ namespace charity_website_backend.Modules.LoginSignup.Services
     }
     public class ResetPasswordDTO
     {
+        public string Email { get; set; }
+        public int UserType { get; set; }
+    }
+    public class RecoverPasswordDTO
+    {
+        public  string NewPassword { get; set; }
         public string Email { get; set; }
         public int UserType { get; set; }
     }

@@ -166,7 +166,7 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                             Message = "Incorrect password."
                         };
                     }
-                    donor.Password_Hash = BCrypt.Net.BCrypt.HashPassword(ChangePasswordData.OldPassword);
+                    donor.Password_Hash = BCrypt.Net.BCrypt.HashPassword(ChangePasswordData.NewPassword);
                     _context.SaveChanges();
                     return new IResult<bool>()
                     {
@@ -378,7 +378,66 @@ namespace charity_website_backend.Modules.LoginSignup.Services
                 Message = "OTP sent successfully"
             };
         }
+        public IResult<bool> RecoverPassword(RecoverPasswordDTO model)
+        {
+            if(model.NewPassword.Length < 8)
+            {
+                return new IResult<bool>()
+                {
+                    Status = status.Failure,
+                    Message = "Password should be atleast 8 characters long"
+                };
+            }
+            switch (model.UserType)
+            {
+                case 0:
+                    var donor = _context.Donors.FirstOrDefault(x => x.Email == model.Email);
+                    if (donor == null)
+                    {
+                        return new IResult<bool>()
+                        {
+                            Status = status.Failure,
+                            Message = "User not found"
+                        };
+                    }
+                    donor.Password_Hash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+                    _context.Donors.Update(donor);
 
+                    _context.SaveChanges();
+                    return new IResult<bool>()
+                    {
+                        Status = status.Success,
+                        Message = "Password changed successfully"
+                    };
+                    break;
+                case 1:
+                    var ngo = _context.NGOs.FirstOrDefault(x => x.Email == model.Email);
+                    if (ngo == null)
+                    {
+                        return new IResult<bool>()
+                        {
+                            Status = status.Failure,
+                            Message = "User not found"
+                        };
+                    }
+                    ngo.Password_Hash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+                    _context.NGOs.Update(ngo);
+                    _context.SaveChanges();
+                    return new IResult<bool>()
+                    {
+                        Status = status.Success,
+                        Message = "Password changed successfully"
+                    };
+                    break;
+                default:
+                    return new IResult<bool>()
+                    {
+                        Status = status.Failure
+                    };
+                    
+            }
+        }
+        
         public IResult<bool> DeleteOTP(int UserType, string Email)
         {
             int? UserId = null;
