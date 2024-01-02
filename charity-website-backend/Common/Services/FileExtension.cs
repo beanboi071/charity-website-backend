@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp.Formats;
+﻿using Microsoft.IdentityModel.Tokens;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
@@ -65,9 +66,12 @@ namespace charity_website_backend.Common.Services
         {
             try
             {
-                string rootDirectory = AppDomain.CurrentDomain.BaseDirectory + @"uploads";
-                string fullPath = Path.Combine(rootDirectory, path);
-                File.Delete(fullPath);
+                if (!path.IsNullOrEmpty())
+                {
+                    string rootDirectory = AppDomain.CurrentDomain.BaseDirectory + @"uploads";
+                    string fullPath = Path.Combine(rootDirectory, path);
+                    File.Delete(fullPath);
+                }
             }
             catch (Exception ex)
             {

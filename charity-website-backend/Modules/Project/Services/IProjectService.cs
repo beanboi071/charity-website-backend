@@ -10,6 +10,7 @@ namespace charity_website_backend.Modules.Project.Services
         IResult<ListVM<ProjectListDTO>> GetProjectsByNGOId(int NGOId,string search,int skip,int take);
         IResult<ListVM<ProjectListDTO>> GetApprovedProjects(string search,string ngoName, int skip, int take);
         IResult<bool> ApproveProject(int ProjectId);
+        IResult<bool> RejectProject(int ProjectId);
         IResult<ListVM<ProjectListDTO>> GetPendingProjects(string search,string ngoName, int skip, int take);
         
         IResult<ProjectDetailDTO> GetProjectDetails(int projectid);

@@ -19,6 +19,7 @@ namespace charity_website_backend.Modules.Project.Api
             app.MapGet(root + "GetProjectDetails", GetProjectDetails);
             app.MapPost(root + "DonateToProject", DonateToProject);
             app.MapGet(root + "ApproveProject", ApproveProject);
+            app.MapGet(root + "RejectProject", RejectProject);
             app.MapGet(root + "GetDonationHistory", GetDonationHistory);
         }
         private static IResult<bool> DonateToProject(DonationDTO model, IProjectService service, ISessionService sessionService)
@@ -38,6 +39,10 @@ namespace charity_website_backend.Modules.Project.Api
         private static IResult<bool> ApproveProject(IProjectService service, int projectId)
         {
             return service.ApproveProject(projectId);
+        }
+        private static IResult<bool> RejectProject(IProjectService service, int projectId)
+        {
+            return service.RejectProject(projectId);
         }
         private static IResult<ListVM<ProjectListDTO>> GetPendingProjects(IProjectService service, string search = "",string ngoName = "", int skip = 0, int take = 10)
         {

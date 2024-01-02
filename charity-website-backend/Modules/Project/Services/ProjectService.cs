@@ -87,6 +87,18 @@ namespace charity_website_backend.Modules.Project.Services
                 Message = "Project approved successfully."
             };
         }
+        public IResult<bool> RejectProject(int ProjectId)
+        {
+            var project = _context.Projects.Find(ProjectId);
+            project.Status = ProjectStatus.Rejected;
+            _context.SaveChanges();
+            return new IResult<bool>()
+            {
+                Data = true,
+                Status = status.Success,
+                Message = "Project rejected successfully."
+            };
+        }
         public  IResult<ListVM<ProjectListDTO>> GetApprovedProjects(string search,string ngoName, int skip, int take)
         {
             List<ProjectListDTO> datalist = new List<ProjectListDTO>();
@@ -213,7 +225,7 @@ namespace charity_website_backend.Modules.Project.Services
         public IResult<ListVM<ProjectListDTO>> GetProjectsByNGOId(int NGOId,string search,int skip,int take)
         {
             List<ProjectListDTO> datalist = new List<ProjectListDTO>();
-            var projects = _context.Projects.Where(x => x.NGO_Id == NGOId && x.Title.ToLower().Contains(search)).ToList();
+            var projects = _context.Projects.Where(x => x.NGO_Id == NGOId && x.Status == ProjectStatus.Approved && x.Title.ToLower().Contains(search)).ToList();
             var data = (from c in projects.Skip(skip).Take(take)
                         select new ProjectListDTO()
                         {
