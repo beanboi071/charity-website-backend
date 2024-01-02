@@ -199,7 +199,7 @@ namespace charity_website_backend.Modules.Project.Services
                 return new IResult<bool>() 
                 {
                     Status = status.Failure,
-                    Message = "Insufficient balance"
+                    Message = "Donation failed."
                 };
             }
             
